@@ -1,3 +1,4 @@
+import protectedAuth from "@/utils/protected";
 import { useSessionContext, useUser } from "@supabase/auth-helpers-react";
 import type { NextPage } from "next";
 import { useRouter } from "next/router";
@@ -76,5 +77,7 @@ const Login: NextPage = () => {
     </div>
   );
 };
+
+export const getServerSideProps = protectedAuth;
 
 export default Login;

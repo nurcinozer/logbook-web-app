@@ -1,3 +1,4 @@
+import protectedAuth from "@/utils/protected";
 import { useSessionContext, useUser } from "@supabase/auth-helpers-react";
 import { useRouter } from "next/router";
 import type { NextPage } from "next/types";
@@ -83,5 +84,7 @@ const Register: NextPage = () => {
     </div>
   );
 };
+
+export const getServerSideProps = protectedAuth;
 
 export default Register;
