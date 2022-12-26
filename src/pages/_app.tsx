@@ -1,3 +1,5 @@
+import type { ColorScheme } from "@mantine/core";
+import { ColorSchemeProvider, MantineProvider } from "@mantine/core";
 import { type AppType } from "next/app";
 
 import { trpc } from "../utils/trpc";
@@ -16,13 +18,27 @@ type Props = {
 
 const MyApp: AppType<Props> = ({ Component, pageProps }) => {
   const [supabaseClient] = useState(() => createBrowserSupabaseClient());
+  const [colorScheme, setColorScheme] = useState<ColorScheme>("light");
+  const toggleColorScheme = (value?: ColorScheme) =>
+    setColorScheme(value || (colorScheme === "dark" ? "light" : "dark"));
 
   return (
     <SessionContextProvider
       supabaseClient={supabaseClient}
       initialSession={pageProps.initialSession}
     >
-      <Component {...pageProps} />
+      <ColorSchemeProvider
+        colorScheme={colorScheme}
+        toggleColorScheme={toggleColorScheme}
+      >
+        <MantineProvider
+          theme={{ colorScheme: colorScheme }}
+          withGlobalStyles
+          withNormalizeCSS
+        >
+          <Component {...pageProps} />
+        </MantineProvider>
+      </ColorSchemeProvider>
     </SessionContextProvider>
   );
 };
