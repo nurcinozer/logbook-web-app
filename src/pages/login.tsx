@@ -1,4 +1,14 @@
+import { FormWrapper } from "@/modules/auth/components";
 import protectedAuth from "@/utils/protected";
+import {
+  Anchor,
+  Paper,
+  TextInput,
+  PasswordInput,
+  Group,
+  Button,
+  Text,
+} from "@mantine/core";
 import { useSessionContext, useUser } from "@supabase/auth-helpers-react";
 import type { NextPage } from "next";
 import { useRouter } from "next/router";
@@ -10,7 +20,7 @@ const Login: NextPage = () => {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [errorMessage, setErrorMessage] = useState<string>();
+  const [validationMessage, setValidationMessage] = useState<string>();
   const [loading, setLoading] = useState(false);
 
   const { supabaseClient } = useSessionContext();
@@ -20,7 +30,7 @@ const Login: NextPage = () => {
   }
 
   const handleLogin = async () => {
-    setErrorMessage(undefined);
+    setValidationMessage(undefined);
     setLoading(true);
 
     const { data, error } = await supabaseClient.auth.signInWithPassword({
@@ -31,7 +41,7 @@ const Login: NextPage = () => {
     setLoading(false);
 
     if (error) {
-      setErrorMessage(error.message);
+      setValidationMessage(error.message);
       return; // early return to prevent redirect
     }
 
@@ -41,40 +51,44 @@ const Login: NextPage = () => {
   };
 
   return (
-    <div>
-      <h1>Sign In</h1>
-      <form
-        onSubmit={(event) => {
-          event.preventDefault();
-          handleLogin();
-        }}
-        method="POST"
-      >
-        <div>
-          <label htmlFor="email">Email</label>
-          <input
-            type="email"
-            id="email"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-          />
-
-          <label htmlFor="password">Password</label>
-          <input
-            type="password"
-            id="password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-          />
-
-          <button type="submit" disabled={loading}>
-            Sign In
-          </button>
-
-          {errorMessage && <p>{errorMessage}</p>}
-        </div>
-      </form>
-    </div>
+    <FormWrapper type="login">
+      <Paper withBorder shadow="md" p={30} mt={30} radius="md">
+        <TextInput
+          label="Email"
+          placeholder="john@doe.com"
+          required
+          onChange={(event) => {
+            setEmail(event.currentTarget.value);
+          }}
+        />
+        <PasswordInput
+          label="Password"
+          placeholder="Your password"
+          required
+          mt="md"
+          onChange={(event) => {
+            setPassword(event.currentTarget.value);
+          }}
+        />
+        <Group position="apart" mt="lg">
+          <Anchor<"a">
+            onClick={(event) => event.preventDefault()}
+            href="#"
+            size="sm"
+          >
+            Forgot password?
+          </Anchor>
+        </Group>
+        <Button fullWidth mt="xl" onClick={handleLogin} loading={loading}>
+          Sign in
+        </Button>
+        {validationMessage && (
+          <Text color="red" size="sm" align="center" mt={5}>
+            {validationMessage}
+          </Text>
+        )}
+      </Paper>
+    </FormWrapper>
   );
 };
 
