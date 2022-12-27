@@ -10,21 +10,14 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id              String            @id @default(cuid())
-  name            String?
-  email           String?           @unique
-  image           String?
-  profile         Profile?
-  Watchlist       Watchlist[]
-  following       User[]            @relation("UserFollowers")
-  followers       User[]            @relation("UserFollowers")
-}
-
 model Profile {
-  username String  @id @unique
-  userId   String  @unique
-  user     User    @relation(fields: [userId], references: [id], onDelete: Cascade) 
+  userId    String      @id @unique
+  email     String
+  avatar    String?
+  username  String?     @unique
+  Watchlist Watchlist[]
+  following Profile[]   @relation("ProfileFollowers")
+  followers Profile[]   @relation("ProfileFollowers")
 }
 
 model Movies {
@@ -37,21 +30,22 @@ model Movies {
 }
 
 model MoviesReviews {
-  id       String   @id @default(cuid())
-  content  String   @db.VarChar(512)
-  created  DateTime @default(now())
-  user_id  String
-  movie_id Int
-  Movies   Movies   @relation(fields: [movie_id], references: [id])
-  @@unique([user_id, movie_id])
+  id         String   @id @default(cuid())
+  content    String   @db.VarChar(512)
+  created    DateTime @default(now())
+  profile_id String
+  movie_id   Int
+  Movies     Movies   @relation(fields: [movie_id], references: [id])
+
+  @@unique([profile_id, movie_id])
   @@index([movie_id])
-  @@index([user_id])
+  @@index([profile_id])
 }
 
 model Watchlist {
   id            String          @id @default(cuid())
-  user_id       String          @unique
-  user          User            @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  profile_id    String          @unique
+  profile       Profile         @relation(fields: [profile_id], references: [userId], onDelete: Cascade)
   WatchlistItem WatchlistItem[]
 }
 
@@ -63,6 +57,7 @@ model WatchlistItem {
   series_id    Int?
   movies       Movies?   @relation(fields: [movie_id], references: [id], onDelete: Cascade)
   watchlist    Watchlist @relation(fields: [watchlist_id], references: [id], onDelete: Cascade)
+
   @@index([movie_id])
   @@index([watchlist_id])
 }
