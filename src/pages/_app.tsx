@@ -1,32 +1,25 @@
 import type { ColorScheme } from "@mantine/core";
 import { ColorSchemeProvider, MantineProvider } from "@mantine/core";
-import { type AppType } from "next/app";
+import { SessionProvider } from "next-auth/react";
 
 import { trpc } from "../utils/trpc";
 
 import "../styles/globals.css";
-import {
-  createBrowserSupabaseClient,
-  type Session,
-} from "@supabase/auth-helpers-nextjs";
+
 import { useState } from "react";
-import { SessionContextProvider } from "@supabase/auth-helpers-react";
+import type { Session } from "next-auth";
+import type { AppType } from "next/app";
 
-type Props = {
-  initialSession: Session;
-};
-
-const MyApp: AppType<Props> = ({ Component, pageProps }) => {
-  const [supabaseClient] = useState(() => createBrowserSupabaseClient());
+const MyApp: AppType<{ session: Session | null }> = ({
+  Component,
+  pageProps: { session, ...pageProps },
+}) => {
   const [colorScheme, setColorScheme] = useState<ColorScheme>("light");
   const toggleColorScheme = (value?: ColorScheme) =>
     setColorScheme(value || (colorScheme === "dark" ? "light" : "dark"));
 
   return (
-    <SessionContextProvider
-      supabaseClient={supabaseClient}
-      initialSession={pageProps.initialSession}
-    >
+    <SessionProvider session={session}>
       <ColorSchemeProvider
         colorScheme={colorScheme}
         toggleColorScheme={toggleColorScheme}
@@ -39,7 +32,7 @@ const MyApp: AppType<Props> = ({ Component, pageProps }) => {
           <Component {...pageProps} />
         </MantineProvider>
       </ColorSchemeProvider>
-    </SessionContextProvider>
+    </SessionProvider>
   );
 };
 
